@@ -15,6 +15,7 @@ import { Provider, connect } from "react-redux";
 import { composeWithDevTools } from "redux-devtools-extension";
 import { setUser } from "./actions";
 import rootReducer from "./reducers/index";
+import { Spinner } from "./Spinner";
 import "semantic-ui-css/semantic.min.css";
 import "./components/App.css";
 
@@ -22,6 +23,7 @@ const store = createStore(rootReducer, composeWithDevTools());
 
 class Root extends React.Component {
   componentDidMount() {
+    console.log(this.props.isLoading);
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
         this.props.setUser(user);
@@ -31,8 +33,9 @@ class Root extends React.Component {
   }
 
   render() {
-    console.log(setUser);
-    return (
+    return this.props.isLoading ? (
+      <Spinner />
+    ) : (
       <Switch>
         <Route exact path="/" component={App} />
         <Route path="/login" component={Login} />
@@ -41,9 +44,13 @@ class Root extends React.Component {
     );
   }
 }
+
+const mapStateToProps = state => ({
+  isLoading: state.user.isLoading
+});
 const RootWithAuth = withRouter(
   connect(
-    null,
+    mapStateToProps,
     { setUser }
   )(Root)
 );
