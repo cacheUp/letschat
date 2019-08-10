@@ -7,11 +7,15 @@ import MetaPanel from "../components/MetaPanel/MetaPanel";
 
 function App() {
   return (
-    <Grid>
+    <Grid columns="equal" className="app" style={{ background: "#eee" }}>
       <ColorPanel />
       <SidePanel />
-      <Messages />
-      <MetaPanel />
+      <Grid.Column style={{ marginLeft: 320 }}>
+        <Messages />
+      </Grid.Column>
+      <Grid.Column style={{ width: 4 }}>
+        <MetaPanel />
+      </Grid.Column>
     </Grid>
   );
 }
