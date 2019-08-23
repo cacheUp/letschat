@@ -25,6 +25,7 @@ class Channels extends Component {
   }
 
   addListeners = () => {
+    console.log("hey");
     let loadedChannels = [];
     this.state.channelsRef.on("child_added", snap => {
       loadedChannels.push(snap.val());
@@ -32,17 +33,18 @@ class Channels extends Component {
     });
   };
 
-  removeListeners = () => {
-    this.state.channelsRef.off();
-  };
-
   setFirstChannel = () => {
+    console.log("hey");
     const firstChannel = this.state.channels[0];
     if (this.state.firstLoad && this.state.channels.length > 0) {
       this.props.setCurrentChannel(firstChannel);
       this.setActiveChannel(firstChannel);
     }
     this.setState({ firstLoad: false });
+  };
+
+  removeListeners = () => {
+    this.state.channelsRef.off();
   };
 
   addChannel = () => {
@@ -160,7 +162,12 @@ class Channels extends Component {
     );
   }
 }
+
+const mapStateToProps = state => ({
+  channel: state.channel.currentChannel
+});
+
 export default connect(
-  null,
+  mapStateToProps,
   { setCurrentChannel }
 )(Channels);
