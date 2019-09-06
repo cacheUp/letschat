@@ -1,6 +1,7 @@
 import React from "react";
 import { Segment, Button, Input } from "semantic-ui-react";
 import firebase from "../../firebase";
+import { connect } from "react-redux";
 
 class MessageForm extends React.Component {
   state = {
@@ -94,4 +95,10 @@ class MessageForm extends React.Component {
   }
 }
 
-export default MessageForm;
+const mapStateToProps = state => {
+  return {
+    currentChannel: state.channel.currentChannel
+  };
+};
+
+export default connect(mapStateToProps)(MessageForm);
