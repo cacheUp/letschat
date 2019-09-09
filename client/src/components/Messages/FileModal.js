@@ -26,11 +26,11 @@ class FileModal extends React.Component {
           />
         </Modal.Content>
         <Modal.Actions>
-          <Button color="green" inverted onClick={closeModal}>
+          <Button color="green" inverted>
             <Icon name="checkmark" />
             Send
           </Button>
-          <Button color="red" inverted>
+          <Button color="red" inverted onClick={closeModal}>
             <Icon name="remove" />
             Cancel
           </Button>
