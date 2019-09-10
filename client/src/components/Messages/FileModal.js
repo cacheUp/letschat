@@ -8,7 +8,9 @@ class FileModal extends React.Component {
 
   addFile = event => {
     const file = event.target.files[0];
-    console.log(file);
+    if (file) {
+      this.setState({ file });
+    }
   };
 
   render() {
