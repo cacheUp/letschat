@@ -1,4 +1,5 @@
 import React from "react";
+import uuidv4 from "uuid/v4";
 import { Segment, Button, Input } from "semantic-ui-react";
 import firebase from "../../firebase";
 import { connect } from "react-redux";
@@ -6,6 +7,9 @@ import FileModal from "./FileModal";
 
 class MessageForm extends React.Component {
   state = {
+    uploadTask: null,
+    uploadState: "",
+    storageRef: firebase.storage().ref(),
     message: "",
     loading: false,
     channel: this.props.currentChannel,
@@ -62,7 +66,21 @@ class MessageForm extends React.Component {
   };
 
   uploadFile = (file, metadata) => {
-    console.log(file, metadata);
+    const pathToUpload = this.state.channel.id;
+    const ref = this.props.messagesRef;
+    const filePath = `chat/public/${uuidv4()}.jpg`;
+    this.setState(
+      {
+        uploadState: "uploading",
+        uploadTask: this.state.storageRef.child(filePath).put(file, metadata)
+      },
+      () => {
+        this.state.uploadTask.onChange("state_changed", snap => {
+          const percentUploaded =
+            (snap.bytesTransferred / snap.totalBytes) * 100;
+        });
+      }
+    );
   };
 
   render() {
