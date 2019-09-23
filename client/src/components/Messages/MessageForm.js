@@ -15,7 +15,8 @@ class MessageForm extends React.Component {
     channel: this.props.currentChannel,
     user: this.props.currentUser,
     errors: [],
-    modal: false
+    modal: false,
+    percentUploaded: 0
   };
   openModal = () => this.setState({ modal: true });
 
@@ -79,6 +80,7 @@ class MessageForm extends React.Component {
           const percentUploaded = Math.round(
             (snap.bytesTransferred / snap.totalBytes) * 100
           );
+          this.setState({ percentUploaded });
         });
       }
     );
