@@ -91,6 +91,21 @@ class MessageForm extends React.Component {
               uploadState: "error",
               uploadTask: null
             });
+          },
+          () => {
+            this.state.uploadTask.snapshot.ref
+              .getDownloadURL()
+              .then(downloadUrl => {
+                this.sendFileMessage(downloadUrl, ref, pathToUpload);
+              })
+              .catch(err => {
+                console.error(err);
+                this.setState({
+                  errors: this.state.errors.concat(err),
+                  uploadState: "error",
+                  uploadTask: null
+                });
+              });
           }
         );
       }
