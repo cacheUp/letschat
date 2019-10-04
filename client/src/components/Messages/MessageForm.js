@@ -26,16 +26,20 @@ class MessageForm extends React.Component {
     this.setState({ [event.target.name]: event.target.value });
   };
 
-  createMessage = () => {
+  createMessage = (fileUrl = null) => {
     const message = {
       timestamp: firebase.database.ServerValue.TIMESTAMP,
       user: {
         id: this.state.user.uid,
         name: this.state.user.displayName,
         avatar: this.state.user.photoURL
-      },
-      content: this.state.message
+      }
     };
+    if (fileUrl !== null) {
+      message["image"] = fileUrl;
+    } else {
+      message["content"] = this.state.message;
+    }
     return message;
   };
 
@@ -110,6 +114,23 @@ class MessageForm extends React.Component {
         );
       }
     );
+  };
+
+  sendFileMessage = (fileUrl, ref, pathToUpload) => {
+    ref
+      .child(pathToUpload)
+      .push()
+      .set(this.createMessage(fileUrl))
+      .then(() => {
+        this.setState({
+          uploadState: "done"
+        }).catch(err => {
+          console.error(err);
+          this.setState({
+            errors: this.state.errors.concat(err)
+          });
+        });
+      });
   };
 
   render() {
