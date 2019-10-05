@@ -80,7 +80,7 @@ class MessageForm extends React.Component {
         uploadTask: this.state.storageRef.child(filePath).put(file, metadata)
       },
       () => {
-        this.state.uploadTask.onChange(
+        this.state.uploadTask.on(
           "state_changed",
           snap => {
             const percentUploaded = Math.round(
@@ -100,6 +100,7 @@ class MessageForm extends React.Component {
             this.state.uploadTask.snapshot.ref
               .getDownloadURL()
               .then(downloadUrl => {
+                console.log("download", downloadUrl);
                 this.sendFileMessage(downloadUrl, ref, pathToUpload);
               })
               .catch(err => {
@@ -117,6 +118,7 @@ class MessageForm extends React.Component {
   };
 
   sendFileMessage = (fileUrl, ref, pathToUpload) => {
+    console.log("file", fileUrl, "path", pathToUpload, "ref", ref);
     ref
       .child(pathToUpload)
       .push()
@@ -124,11 +126,12 @@ class MessageForm extends React.Component {
       .then(() => {
         this.setState({
           uploadState: "done"
-        }).catch(err => {
-          console.error(err);
-          this.setState({
-            errors: this.state.errors.concat(err)
-          });
+        });
+      })
+      .catch(err => {
+        console.error(err);
+        this.setState({
+          errors: this.state.errors.concat(err)
         });
       });
   };
