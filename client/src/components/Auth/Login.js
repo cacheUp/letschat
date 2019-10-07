@@ -102,7 +102,7 @@ class Login extends React.Component {
 
               <Message>
                 Don't have an account?
-                <Link to="/login">Register</Link>
+                <Link to="/register">Register</Link>
               </Message>
             </Segment>
           </Form>
