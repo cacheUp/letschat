@@ -1,31 +1,30 @@
 import React from "react";
 import { Grid } from "semantic-ui-react";
-import ColorPanel from "../components/ColorPanel/ColorPanel";
-import SidePanel from "../components/SidePanel/SidePanel";
-import Messages from "../components/Messages/Messages";
-import MetaPanel from "../components/MetaPanel/MetaPanel";
+import "./App.css";
 import { connect } from "react-redux";
 
-function App({ currentUser, currentChannel }) {
-  return (
-    <Grid columns="equal" className="app" style={{ background: "#eee" }}>
-      <ColorPanel />
-      <SidePanel
-        currentUser={currentUser}
-        key={currentUser && currentUser.id}
-      />
-      <Grid.Column style={{ marginLeft: 320 }}>
-        <Messages currentChannel={currentChannel} currentUser={currentUser} />
-      </Grid.Column>
-      <Grid.Column
+import ColorPanel from "./ColorPanel/ColorPanel";
+import SidePanel from "./SidePanel/SidePanel";
+import Messages from "./Messages/Messages";
+import MetaPanel from "./MetaPanel/MetaPanel";
+
+const App = ({ currentUser, currentChannel }) => (
+  <Grid columns="equal" className="app" style={{ background: "#eee" }}>
+    <ColorPanel />
+    <SidePanel key={currentUser && currentUser.uid} currentUser={currentUser} />
+
+    <Grid.Column style={{ marginLeft: 320 }}>
+      <Messages
         key={currentChannel && currentChannel.id}
-        style={{ width: 4 }}
-      >
-        <MetaPanel />
-      </Grid.Column>
-    </Grid>
-  );
-}
+        currentUser={currentUser}
+      />
+    </Grid.Column>
+
+    <Grid.Column width={4}>
+      <MetaPanel />
+    </Grid.Column>
+  </Grid>
+);
 
 const mapStateToProps = state => ({
   currentUser: state.user.currentUser,
