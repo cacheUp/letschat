@@ -69,6 +69,7 @@ class Messages extends React.Component {
       return acc;
     }, []);
     this.setState({ searchResults });
+    setTimeout(() => this.setState({ searchLoading: false }), 1000);
   };
 
   countUniqueUsers = messages => {
@@ -109,7 +110,8 @@ class Messages extends React.Component {
       progressBar,
       numUniqueUsers,
       searchResults,
-      searchTerm
+      searchTerm,
+      searchLoading
     } = this.state;
     console.log("Search term", searchTerm, "search results", searchResults);
     return (
@@ -119,6 +121,7 @@ class Messages extends React.Component {
           numUniqueUsers={numUniqueUsers}
           handleSearchChange={this.handleSearchChange}
           searchTerm={searchTerm}
+          searchLoading={searchLoading}
         />
         <Segment>
           <Comment.Group
