@@ -1,11 +1,68 @@
 import React from "react";
 import { Menu, Icon } from "semantic-ui-react";
-import { userInfo } from "os";
+import firebase from "../../firebase";
 
 class DirectMessages extends React.Component {
   state = {
-    users: []
+    user: this.props.currentUser,
+    users: [],
+    userRef: firebase.database().ref("users"),
+    connectedRef: firebase.database().ref(".info/connected"),
+    prescenceRef: firebase.database().ref("prescence")
   };
+
+  componentDidMount() {
+    if (this.state.user) {
+      this.addListeners(this.state.user.uid);
+    }
+  }
+
+  addListeners = currentUserUid => {
+    let loadedUsers = [];
+    this.state.userRef.on("child_added", snap => {
+      if (currentUserUid !== snap.key) {
+        let user = snap.val();
+        user["uid"] = snap.key;
+        user["status"] = "offline";
+        loadedUsers.push(user);
+        this.setState({ users: loadedUsers });
+      }
+    });
+    this.state.connectedRef.on("value", snap => {
+      if (snap.val() === true) {
+        const ref = this.state.prescenceRef.child(currentUserUid);
+        ref.set(true);
+        ref.onDisconnect().remove(err => {
+          if (err !== null) {
+            console.error(err);
+          }
+        });
+      }
+    });
+    this.state.prescenceRef.on("child_added", snap => {
+      if (currentUserUid !== snap.key) {
+        this.addStatusToUser(snap.key);
+      }
+    });
+
+    this.state.prescenceRef.on("child_removed", snap => {
+      if (currentUserUid !== snap.key) {
+        this.addStatusToUser(snap.key, false);
+      }
+    });
+  };
+
+  addStatusToUser = (userId, connected = true) => {
+    const updatedUsers = this.state.users.reduce((acc, user) => {
+      if (user.id === userId) {
+        user["status"] = `${connected ? "online" : "offline"}`;
+      }
+      return acc.concat(user);
+    }, []);
+    this.setState({ users: updatedUsers });
+  };
+
+  isUserOnline = user => user.status === "online";
 
   render() {
     const { users } = this.state;
@@ -19,7 +76,19 @@ class DirectMessages extends React.Component {
           </span>{" "}
           ({users.length})
         </Menu.Item>
-        {/* User to send dms to */}
+        {users.map(user => (
+          <Menu.Item
+            key={user.uid}
+            onClick={() => console.log(user)}
+            style={{ opacity: 0.7, fontStyle: "italic" }}
+          >
+            <Icon
+              name="circle"
+              color={this.isUserOnline(user) ? "green" : "red"}
+            />
+            @ {user.name}
+          </Menu.Item>
+        ))}
       </Menu.Menu>
     );
   }
