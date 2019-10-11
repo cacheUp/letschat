@@ -46,6 +46,7 @@ class Messages extends React.Component {
   };
 
   handleSearchChange = event => {
+    console.log("event.target.value");
     this.setState(
       {
         searchTerm: event.target.value,
@@ -107,13 +108,14 @@ class Messages extends React.Component {
       searchResults,
       searchTerm
     } = this.state;
-
+    console.log("Search term", searchTerm, "search results", searchResults);
     return (
       <React.Fragment>
         <MessagesHeader
           channelName={this.displayChannelName(this.props.channel)}
           numUniqueUsers={numUniqueUsers}
           handleSearchChange={this.handleSearchChange}
+          searchTerm={searchTerm}
         />
         <Segment>
           <Comment.Group
