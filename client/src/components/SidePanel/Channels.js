@@ -25,7 +25,6 @@ class Channels extends Component {
   }
 
   addListeners = () => {
-    console.log("hey");
     let loadedChannels = [];
     this.state.channelsRef.on("child_added", snap => {
       loadedChannels.push(snap.val());
@@ -34,7 +33,6 @@ class Channels extends Component {
   };
 
   setFirstChannel = () => {
-    console.log("hey");
     const firstChannel = this.state.channels[0];
     if (this.state.firstLoad && this.state.channels.length > 0) {
       this.props.setCurrentChannel(firstChannel);
@@ -116,7 +114,7 @@ class Channels extends Component {
     const { channels, modal } = this.state;
     return (
       <Fragment>
-        <Menu.Menu style={{ paddingBottom: "2em" }}>
+        <Menu.Menu className="menu">
           <Menu.Item>
             <span>
               <Icon name="exchange" /> CHANNELS{" "}
