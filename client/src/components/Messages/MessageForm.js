@@ -15,7 +15,8 @@ class MessageForm extends React.Component {
     channel: this.props.currentChannel,
     user: this.props.currentUser,
     errors: [],
-    modal: false
+    modal: false,
+    percentUploaded: 0
   };
   openModal = () => this.setState({ modal: true });
 
@@ -75,10 +76,23 @@ class MessageForm extends React.Component {
         uploadTask: this.state.storageRef.child(filePath).put(file, metadata)
       },
       () => {
-        this.state.uploadTask.onChange("state_changed", snap => {
-          const percentUploaded =
-            (snap.bytesTransferred / snap.totalBytes) * 100;
-        });
+        this.state.uploadTask.onChange(
+          "state_changed",
+          snap => {
+            const percentUploaded = Math.round(
+              (snap.bytesTransferred / snap.totalBytes) * 100
+            );
+            this.setState({ percentUploaded });
+          },
+          err => {
+            console.error(err);
+            this.setState({
+              errors: this.state.errors.concat(err),
+              uploadState: "error",
+              uploadTask: null
+            });
+          }
+        );
       }
     );
   };
