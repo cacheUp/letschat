@@ -1,5 +1,13 @@
 import React, { Component, Fragment } from "react";
-import { Menu, Icon, Modal, Form, Input, Button } from "semantic-ui-react";
+import {
+  Menu,
+  Icon,
+  Modal,
+  Form,
+  Input,
+  Button,
+  Label
+} from "semantic-ui-react";
 import firebase from "../../firebase";
 import { connect } from "react-redux";
 import { setCurrentChannel, setPrivateChannel } from "../../actions/index";
@@ -78,6 +86,7 @@ class Channels extends Component {
     if (this.state.firstLoad && this.state.channels.length > 0) {
       this.props.setCurrentChannel(firstChannel);
       this.setActiveChannel(firstChannel);
+      this.setState({ channel: firstChannel });
     }
     this.setState({ firstLoad: false });
   };
@@ -151,6 +160,16 @@ class Channels extends Component {
     this.setState({ activeChannel: channel.id });
   };
 
+  getNotificationCount = channel => {
+    let count = 0;
+    this.state.notifications.forEach(notification => {
+      if (notification.id === channel.id) {
+        count = notification.count;
+      }
+    });
+    if (count > 0) return count;
+  };
+
   displayChannels = channels =>
     channels.length > 0 &&
     channels.map(channel => (
@@ -161,6 +180,9 @@ class Channels extends Component {
         style={{ opacity: 0.7 }}
         active={channel.id === this.state.activeChannel}
       >
+        {this.getNotificationCount(channel) && (
+          <Label color="red">{this.getNotificationCount(channel)} </Label>
+        )}
         # {channel.name}
       </Menu.Item>
     ));
