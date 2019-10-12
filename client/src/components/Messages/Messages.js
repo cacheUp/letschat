@@ -49,8 +49,8 @@ class Messages extends React.Component {
   };
 
   getMessagesRef = () => {
-    const { messagesRef, privateMessagesRef, privateChannel } = this.state;
-    return privateChannel ? privateMessagesRef : messagesRef;
+    const { messagesRef, privateMessagesRef, isPrivateChannel } = this.state;
+    return isPrivateChannel ? privateMessagesRef : messagesRef;
   };
 
   handleSearchChange = event => {
