@@ -20,7 +20,8 @@ class Messages extends React.Component {
       numUniqueUsers: "",
       searchTerm: "",
       searchLoading: false,
-      searchResults: []
+      searchResults: [],
+      isChannelStarred: false
     };
   }
 
@@ -51,6 +52,23 @@ class Messages extends React.Component {
   getMessagesRef = () => {
     const { messagesRef, privateMessagesRef, isPrivateChannel } = this.state;
     return isPrivateChannel ? privateMessagesRef : messagesRef;
+  };
+
+  handleStar = () => {
+    this.setState(
+      prevState => ({
+        isChannelStarred: !prevState.isChannelStarred
+      }),
+      () => this.starChannel()
+    );
+  };
+
+  starChannel = () => {
+    if (this.state.isChannelStarred) {
+      console.log("star");
+    } else {
+      console.log("unstar");
+    }
   };
 
   handleSearchChange = event => {
