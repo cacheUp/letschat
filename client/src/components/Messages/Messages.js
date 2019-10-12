@@ -17,11 +17,13 @@ class Messages extends React.Component {
       messages: [],
       messagesLoading: true,
       progressBar: false,
+      usersRef: firebase.database().ref("users"),
       numUniqueUsers: "",
       searchTerm: "",
       searchLoading: false,
       searchResults: [],
-      isChannelStarred: false
+      isChannelStarred: false,
+      channel: this.props.channel
     };
   }
 
@@ -29,6 +31,7 @@ class Messages extends React.Component {
     const { channel, user } = this.props;
     if (channel && user) {
       this.addListeners(channel.id);
+      this.addUsersStarsListener(channel.id, user.uid);
     }
   }
 
@@ -65,9 +68,25 @@ class Messages extends React.Component {
 
   starChannel = () => {
     if (this.state.isChannelStarred) {
-      console.log("star");
+      this.state.usersRef.child(`${this.state.user.uid}/starred`).update({
+        [this.state.channel.id]: {
+          name: this.state.channel.name,
+          details: this.state.channel.details,
+          createdBy: {
+            name: this.state.channel.createdBy.name,
+            avatar: this.state.channel.createdBy.avatar
+          }
+        }
+      });
     } else {
-      console.log("unstar");
+      this.state
+        .child(`${this.state.user.uid}/starred`)
+        .child(this.state.channel.id)
+        .remove(err => {
+          if (err !== null) {
+            console.error(err);
+          }
+        });
     }
   };
 
@@ -142,7 +161,8 @@ class Messages extends React.Component {
       searchResults,
       searchTerm,
       searchLoading,
-      isPrivateChannel
+      isPrivateChannel,
+      isChannelStarred
     } = this.state;
     console.log("Search term", searchTerm, "search results", searchResults);
     return (
@@ -154,6 +174,8 @@ class Messages extends React.Component {
           searchTerm={searchTerm}
           searchLoading={searchLoading}
           isPrivateChannel={isPrivateChannel}
+          handleStar={this.handleStar}
+          isChannelStarred={isChannelStarred}
         />
         <Segment>
           <Comment.Group
