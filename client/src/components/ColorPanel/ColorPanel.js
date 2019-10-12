@@ -11,6 +11,8 @@ import {
 } from "semantic-ui-react";
 import { SliderPicker } from "react-color";
 import firebase from "../../firebase";
+import { connect } from "react-redux";
+import { setColors } from "../../actions";
 
 class ColorPanel extends React.Component {
   state = {
@@ -138,4 +140,7 @@ class ColorPanel extends React.Component {
   }
 }
 
-export default ColorPanel;
+export default connect(
+  null,
+  { setColors }
+)(ColorPanel);
