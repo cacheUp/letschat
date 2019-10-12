@@ -57,6 +57,20 @@ class Messages extends React.Component {
     return isPrivateChannel ? privateMessagesRef : messagesRef;
   };
 
+  addUsersStarsListener = (channelId, userId) => {
+    this.state.usersRef
+      .child(userId)
+      .child("starred")
+      .once("value")
+      .then(data => {
+        if (data.val() !== null) {
+          const channelIds = Object.keys(data.val());
+          const prevStarred = channelIds.includes(channelId);
+          this.setState({ isChannelStarred: prevStarred });
+        }
+      });
+  };
+
   handleStar = () => {
     this.setState(
       prevState => ({
@@ -79,7 +93,7 @@ class Messages extends React.Component {
         }
       });
     } else {
-      this.state
+      this.state.usersRef
         .child(`${this.state.user.uid}/starred`)
         .child(this.state.channel.id)
         .remove(err => {
