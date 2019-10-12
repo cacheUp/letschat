@@ -2,7 +2,7 @@ import React from "react";
 import { Segment, Accordion, Header, Icon } from "semantic-ui-react";
 
 class MetaPanel extends React.Component {
-  state = { activeIndex: 0 };
+  state = { activeIndex: 0, privateChannel: this.props.isPrivateChannel };
 
   setActiveIndex = (event, titleProps) => {
     const { index } = titleProps;
@@ -11,7 +11,10 @@ class MetaPanel extends React.Component {
     this.setState({ activeIndex: newIndex });
   };
   render() {
-    const { activeIndex } = this.state;
+    const { activeIndex, privateChannel } = this.state;
+    if (privateChannel) {
+      return null;
+    }
     return (
       <Segment>
         <Header as="h3" attatched="top">
