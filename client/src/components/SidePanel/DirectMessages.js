@@ -11,7 +11,7 @@ class DirectMessages extends React.Component {
     users: [],
     userRef: firebase.database().ref("users"),
     connectedRef: firebase.database().ref(".info/connected"),
-    prescenceRef: firebase.database().ref("prescence")
+    presenceRef: firebase.database().ref("presence")
   };
 
   componentDidMount() {
@@ -33,7 +33,7 @@ class DirectMessages extends React.Component {
     });
     this.state.connectedRef.on("value", snap => {
       if (snap.val() === true) {
-        const ref = this.state.prescenceRef.child(currentUserUid);
+        const ref = this.state.presenceRef.child(currentUserUid);
         ref.set(true);
         ref.onDisconnect().remove(err => {
           if (err !== null) {
@@ -42,13 +42,13 @@ class DirectMessages extends React.Component {
         });
       }
     });
-    this.state.prescenceRef.on("child_added", snap => {
+    this.state.presenceRef.on("child_added", snap => {
       if (currentUserUid !== snap.key) {
         this.addStatusToUser(snap.key);
       }
     });
 
-    this.state.prescenceRef.on("child_removed", snap => {
+    this.state.presenceRef.on("child_removed", snap => {
       if (currentUserUid !== snap.key) {
         this.addStatusToUser(snap.key, false);
       }
@@ -56,8 +56,9 @@ class DirectMessages extends React.Component {
   };
 
   addStatusToUser = (userId, connected = true) => {
+    console.log("hey");
     const updatedUsers = this.state.users.reduce((acc, user) => {
-      if (user.id === userId) {
+      if (user.uid === userId) {
         user["status"] = `${connected ? "online" : "offline"}`;
       }
       return acc.concat(user);
@@ -108,6 +109,7 @@ class DirectMessages extends React.Component {
             onClick={() => this.changeChannel(user)}
             style={{ opacity: 0.7, fontStyle: "italic" }}
           >
+            {console.log(user)}
             <Icon
               name="circle"
               color={this.isUserOnline(user) ? "green" : "red"}
