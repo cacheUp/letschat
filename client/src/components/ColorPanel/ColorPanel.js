@@ -18,7 +18,22 @@ class ColorPanel extends React.Component {
     primary: "",
     secondary: "",
     usersRef: firebase.database().ref("users"),
-    user: this.props.currentUser
+    user: this.props.currentUser,
+    userColors: []
+  };
+
+  componentDidMount() {
+    if (this.state.user) {
+      this.addListener(this.state.user.uid);
+    }
+  }
+
+  addListener = userId => {
+    let userColors = [];
+    this.state.usersRef.child(`${userId}/colors`).on("child_added", snap => {
+      userColors.unshift(snap.val());
+      this.setState({ userColors });
+    });
   };
 
   handleChangePrimary = color => {
@@ -46,12 +61,37 @@ class ColorPanel extends React.Component {
       .catch(err => console.error(err));
   };
 
+  displayUserColors = colors => {
+    return (
+      colors.length > 0 &&
+      colors.map((color, i) => (
+        <React.Fragment key={i}>
+          <Divider />
+          <div
+            className="color__container"
+            onClick={() => this.props.setColors(color.primary, color.secondary)}
+          >
+            <div
+              className="color__square"
+              style={{ background: color.primary }}
+            >
+              <div
+                className="color__overlay"
+                style={{ background: color.secondary }}
+              ></div>
+            </div>
+          </div>
+        </React.Fragment>
+      ))
+    );
+  };
+
   openModal = () => this.setState({ modal: true });
 
   closeModal = () => this.setState({ modal: false });
 
   render() {
-    const { modal, primary, secondary } = this.state;
+    const { modal, primary, secondary, userColors } = this.state;
     return (
       <Sidebar
         as={Menu}
@@ -63,6 +103,7 @@ class ColorPanel extends React.Component {
       >
         <Divider />
         <Button icon="add" size="small" color="blue" onClick={this.openModal} />
+        {this.displayUserColors(userColors)}
         {/* Color Picker Modal */}
         <Modal basic open={modal} onClose={this.closeModal}>
           <Modal.Header>Choose App Colors</Modal.Header>
