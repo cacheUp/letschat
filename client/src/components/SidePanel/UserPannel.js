@@ -1,10 +1,41 @@
 import React, { Component } from "react";
 import firebase from "../../firebase";
-import { Grid, Header, Icon, Dropdown, Image } from "semantic-ui-react";
+import AvatarEditor from "react-avatar-editor";
+import {
+  Grid,
+  Header,
+  Icon,
+  Dropdown,
+  Image,
+  Modal,
+  Input,
+  Button
+} from "semantic-ui-react";
 import { connect } from "react-redux";
 
 class UserPanel extends Component {
-  state = { user: this.props.currentUser };
+  state = {
+    user: this.props.currentUser,
+    modal: false,
+    previewImage: "",
+    blob: "",
+    croppedImage: "",
+    storageRef: firebase.storage().ref(),
+    userRef: firebase.auth().currentUser,
+    metadata: {
+      contentType: "image/jpeg"
+    },
+    uploadedCroppedImage: "",
+    usersRef: firebase.database().ref("users")
+  };
+
+  openModal = () => {
+    this.setState({ modal: true });
+  };
+
+  closeModal = () => {
+    this.setState({ modal: false });
+  };
 
   dropdownOptions = () => [
     {
@@ -16,9 +47,63 @@ class UserPanel extends Component {
       ),
       disabled: true
     },
-    { key: "avatar", text: <span>Change Avatar</span> },
+    {
+      key: "avatar",
+      text: <span onClick={this.openModal}>Change Avatar</span>
+    },
     { key: "signout", text: <span onClick={this.handleSignout}>Sign Out</span> }
   ];
+
+  uploadCroppedImage = () => {
+    const { storageRef, userRef, blob, metadata } = this.state;
+    storageRef
+      .child(`avatar/user-${userRef.uid}`)
+      .put(blob, metadata)
+      .then(snap => {
+        snap.ref.getDownloadURL().then(downloadURL => {
+          this.setState({ uploadedCroppedImage: downloadURL }, () => {
+            this.changeAvatar();
+          });
+        });
+      });
+  };
+
+  changeAvatar = () => {
+    this.state.userRef
+      .updateProfile({
+        photoURL: this.state.uploadedCroppedImage
+      })
+      .then(() => {
+        console.log("Photo Url updated");
+        this.closeModal();
+      })
+      .catch(err => console.error(err));
+    this.state.usersRef
+      .child(this.state.user.uid)
+      .update({ avatar: this.state.uploadedCroppedImage })
+      .then(() => console.log("user avatar updated"))
+      .catch(err => console.log(err));
+  };
+
+  handleCropImage = () => {
+    if (this.avatarEditor) {
+      this.avatarEditor.getImageScaledToCanvas().toBlob(blob => {
+        let imageUrl = URL.createObjectURL(blob);
+        this.setState({ croppedImage: imageUrl, blob });
+      });
+    }
+  };
+
+  handleChange = event => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    if (file) {
+      reader.readAsDataURL(file);
+      reader.addEventListener("load", () => {
+        this.setState({ previewImage: reader.result });
+      });
+    }
+  };
 
   handleSignout = () => {
     firebase
@@ -28,7 +113,7 @@ class UserPanel extends Component {
   };
 
   render() {
-    const { user } = this.state;
+    const { user, modal, previewImage, croppedImage } = this.state;
     const { primaryColor } = this.props;
     return (
       <Grid style={{ background: primaryColor }}>
@@ -52,6 +137,63 @@ class UserPanel extends Component {
               ></Dropdown>
             </Header>
           </Grid.Row>
+          {/* change user avatar modal */}
+
+          <Modal basic open={modal} onClose={this.closeModal}>
+            <Modal.Header>Change Avatar</Modal.Header>
+            <Modal.Content>
+              <Input
+                fluid
+                type="file"
+                label="New Avatar"
+                name="previewImage"
+                onChange={this.handleChange}
+              />
+              <Grid centered stackable columns={2}>
+                <Grid.Row centered>
+                  <Grid.Column className="ui center aligned grid">
+                    {previewImage && (
+                      <AvatarEditor
+                        ref={node => (this.avatarEditor = node)}
+                        image={previewImage}
+                        width={120}
+                        height={120}
+                        border={50}
+                        scale={1.2}
+                      />
+                    )}
+                  </Grid.Column>
+                  <Grid.Row>
+                    {croppedImage && (
+                      <Image
+                        style={{ margin: "3.5em auto" }}
+                        width={100}
+                        height={100}
+                        src={croppedImage}
+                      />
+                    )}
+                  </Grid.Row>
+                </Grid.Row>
+              </Grid>
+            </Modal.Content>
+            <Modal.Actions>
+              {croppedImage && (
+                <Button
+                  color="green"
+                  inverted
+                  onClick={this.uploadCroppedImage}
+                >
+                  <Icon name="save" /> Change Avatar
+                </Button>
+              )}
+              <Button color="green" inverted onClick={this.handleCropImage}>
+                <Icon name="image" /> Preview
+              </Button>
+              <Button color="red" inverted onClick={this.closeModal}>
+                <Icon name="remove" /> Cancel
+              </Button>
+            </Modal.Actions>
+          </Modal>
         </Grid.Column>
       </Grid>
     );
