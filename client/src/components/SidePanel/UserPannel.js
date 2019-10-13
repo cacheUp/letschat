@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import firebase from "../../firebase";
+import AvatarEditor from "react-avatar-editor";
 import {
   Grid,
   Header,
@@ -13,7 +14,13 @@ import {
 import { connect } from "react-redux";
 
 class UserPanel extends Component {
-  state = { user: this.props.currentUser, modal: false };
+  state = {
+    user: this.props.currentUser,
+    modal: false,
+    previewImage: "",
+    blob: "",
+    croppedImage: ""
+  };
 
   openModal = () => {
     this.setState({ modal: true });
@@ -40,7 +47,26 @@ class UserPanel extends Component {
     { key: "signout", text: <span onClick={this.handleSignout}>Sign Out</span> }
   ];
 
-  openModal;
+  handleCropImage = () => {
+    if (this.avatarEditor) {
+      this.avatarEditor.getImageScaledToCanvas().toBlob(blob => {
+        let imageUrl = URL.createObjectURL(blob);
+        this.setState({ croppedImage: imageUrl, blob });
+      });
+    }
+  };
+
+  handleChange = event => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    if (file) {
+      reader.readAsDataURL(file);
+      reader.addEventListener("load", () => {
+        this.setState({ previewImage: reader.result });
+      });
+    }
+  };
+
   handleSignout = () => {
     firebase
       .auth()
@@ -49,7 +75,7 @@ class UserPanel extends Component {
   };
 
   render() {
-    const { user, modal } = this.state;
+    const { user, modal, previewImage, croppedImage } = this.state;
     const { primaryColor } = this.props;
     return (
       <Grid style={{ background: primaryColor }}>
@@ -78,21 +104,47 @@ class UserPanel extends Component {
           <Modal basic open={modal} onClose={this.closeModal}>
             <Modal.Header>Change Avatar</Modal.Header>
             <Modal.Content>
-              <Input fluid tupe="file" label="New Avatar" name="previewImage" />
+              <Input
+                fluid
+                type="file"
+                label="New Avatar"
+                name="previewImage"
+                onChange={this.handleChange}
+              />
               <Grid centered stackable columns={2}>
                 <Grid.Row centered>
                   <Grid.Column className="ui center aligned grid">
-                    {/* Image preview */}
+                    {previewImage && (
+                      <AvatarEditor
+                        ref={node => (this.avatarEditor = node)}
+                        image={previewImage}
+                        width={120}
+                        height={120}
+                        border={50}
+                        scale={1.2}
+                      />
+                    )}
                   </Grid.Column>
-                  <Grid.Row>{/* Crop Image Preview */}</Grid.Row>
+                  <Grid.Row>
+                    {croppedImage && (
+                      <Image
+                        style={{ margin: "3.5em auto" }}
+                        width={100}
+                        height={100}
+                        src={croppedImage}
+                      />
+                    )}
+                  </Grid.Row>
                 </Grid.Row>
               </Grid>
             </Modal.Content>
             <Modal.Actions>
-              <Button color="green" inverted>
-                <Icon name="save" /> Change Avatar
-              </Button>
-              <Button color="green" inverted>
+              {croppedImage && (
+                <Button color="green" inverted>
+                  <Icon name="save" /> Change Avatar
+                </Button>
+              )}
+              <Button color="green" inverted onClick={this.handleCropImage}>
                 <Icon name="image" /> Preview
               </Button>
               <Button color="red" inverted onClick={this.closeModal}>
