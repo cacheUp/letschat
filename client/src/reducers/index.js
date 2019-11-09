@@ -36,7 +36,6 @@ const channel_reducer = (state = initialChannelState, action) => {
         ...state,
         currentChannel: action.payload.currentChannel
       };
-
     case actionTypes.SET_PRIVATE_CHANNEL:
       return {
         ...state,
@@ -64,7 +63,6 @@ const colors_reducer = (state = initialColorsState, action) => {
         primaryColor: action.payload.primaryColor,
         secondaryColor: action.payload.secondaryColor
       };
-
     default:
       return state;
   }

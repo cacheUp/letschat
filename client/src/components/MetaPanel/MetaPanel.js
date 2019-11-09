@@ -10,9 +10,9 @@ import {
 
 class MetaPanel extends React.Component {
   state = {
-    activeIndex: 0,
+    channel: this.props.currentChannel,
     privateChannel: this.props.isPrivateChannel,
-    channel: this.props.currentChannel
+    activeIndex: 0
   };
 
   setActiveIndex = (event, titleProps) => {
@@ -24,8 +24,8 @@ class MetaPanel extends React.Component {
 
   formatCount = num => (num > 1 || num === 0 ? `${num} posts` : `${num} post`);
 
-  displayTopPosters = posts => {
-    return Object.entries(posts)
+  displayTopPosters = posts =>
+    Object.entries(posts)
       .sort((a, b) => b[1] - a[1])
       .map(([key, val], i) => (
         <List.Item key={i}>
@@ -36,18 +36,17 @@ class MetaPanel extends React.Component {
           </List.Content>
         </List.Item>
       ))
-      .slice(0, 5);
-  };
+      .slice(0, 2);
+
   render() {
     const { activeIndex, privateChannel, channel } = this.state;
     const { userPosts } = this.props;
 
-    if (privateChannel) {
-      return null;
-    }
+    if (privateChannel) return null;
+
     return (
       <Segment loading={!channel}>
-        <Header as="h3" attatched="top">
+        <Header as="h3" attached="top">
           About # {channel && channel.name}
         </Header>
         <Accordion styled attached="true">
@@ -58,10 +57,10 @@ class MetaPanel extends React.Component {
           >
             <Icon name="dropdown" />
             <Icon name="info" />
-            {channel && channel.details}
+            Channel Details
           </Accordion.Title>
           <Accordion.Content active={activeIndex === 0}>
-            details
+            {channel && channel.details}
           </Accordion.Content>
 
           <Accordion.Title
@@ -74,7 +73,7 @@ class MetaPanel extends React.Component {
             Top Posters
           </Accordion.Title>
           <Accordion.Content active={activeIndex === 1}>
-            <List> {userPosts && this.displayTopPosters(userPosts)}</List>
+            <List>{userPosts && this.displayTopPosters(userPosts)}</List>
           </Accordion.Content>
 
           <Accordion.Title

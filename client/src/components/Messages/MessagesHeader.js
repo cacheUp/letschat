@@ -1,7 +1,7 @@
-import React, { Component } from "react";
-import { Header, Input, Icon, Segment } from "semantic-ui-react";
+import React from "react";
+import { Header, Segment, Input, Icon } from "semantic-ui-react";
 
-class MessagesHeader extends Component {
+class MessagesHeader extends React.Component {
   render() {
     const {
       channelName,
@@ -12,10 +12,11 @@ class MessagesHeader extends Component {
       handleStar,
       isChannelStarred
     } = this.props;
+
     return (
       <Segment clearing>
         {/* Channel Title */}
-        <Header fluid="true" as="h2" floated="left" style={{ marginBottem: 0 }}>
+        <Header fluid="true" as="h2" floated="left" style={{ marginBottom: 0 }}>
           <span>
             {channelName}
             {!isPrivateChannel && (
@@ -28,6 +29,7 @@ class MessagesHeader extends Component {
           </span>
           <Header.Subheader>{numUniqueUsers}</Header.Subheader>
         </Header>
+
         {/* Channel Search Input */}
         <Header floated="right">
           <Input
@@ -37,7 +39,6 @@ class MessagesHeader extends Component {
             icon="search"
             name="searchTerm"
             placeholder="Search Messages"
-            value={this.props.searchTerm}
           />
         </Header>
       </Segment>

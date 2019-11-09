@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 const Typing = () => (
   <div className="typing">
@@ -6,6 +6,6 @@ const Typing = () => (
     <div className="typing__dot"></div>
     <div className="typing__dot"></div>
   </div>
-);
+)
 
 export default Typing;
