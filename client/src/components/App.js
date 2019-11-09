@@ -8,18 +8,12 @@ import SidePanel from "./SidePanel/SidePanel";
 import Messages from "./Messages/Messages";
 import MetaPanel from "./MetaPanel/MetaPanel";
 
-const App = ({
-  currentUser,
-  currentChannel,
-  isPrivateChannel,
-  userPosts,
-  primaryColor,
-  secondaryColor
-}) => (
+// prettier-ignore
+const App = ({ currentUser, currentChannel, isPrivateChannel, userPosts, primaryColor, secondaryColor }) => (
   <Grid columns="equal" className="app" style={{ background: secondaryColor }}>
     <ColorPanel
-      currentUser={currentUser}
       key={currentUser && currentUser.name}
+      currentUser={currentUser}
     />
     <SidePanel
       key={currentUser && currentUser.uid}
@@ -30,6 +24,7 @@ const App = ({
     <Grid.Column style={{ marginLeft: 320 }}>
       <Messages
         key={currentChannel && currentChannel.id}
+        currentChannel={currentChannel}
         currentUser={currentUser}
         isPrivateChannel={isPrivateChannel}
       />
@@ -38,9 +33,9 @@ const App = ({
     <Grid.Column width={4}>
       <MetaPanel
         key={currentChannel && currentChannel.name}
-        isPrivateChannel={isPrivateChannel}
-        currentChannel={currentChannel}
         userPosts={userPosts}
+        currentChannel={currentChannel}
+        isPrivateChannel={isPrivateChannel}
       />
     </Grid.Column>
   </Grid>

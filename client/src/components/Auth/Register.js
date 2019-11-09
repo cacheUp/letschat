@@ -1,4 +1,6 @@
 import React from "react";
+import firebase from "../../firebase";
+import md5 from "md5";
 import {
   Grid,
   Form,
@@ -8,9 +10,7 @@ import {
   Message,
   Icon
 } from "semantic-ui-react";
-import firebase from "../../firebase";
 import { Link } from "react-router-dom";
-import md5 from "md5";
 
 class Register extends React.Component {
   state = {
@@ -50,7 +50,7 @@ class Register extends React.Component {
   };
 
   isPasswordValid = ({ password, passwordConfirmation }) => {
-    if (password.length < 6 || passwordConfirmation < 6) {
+    if (password.length < 6 || passwordConfirmation.length < 6) {
       return false;
     } else if (password !== passwordConfirmation) {
       return false;
@@ -60,7 +60,7 @@ class Register extends React.Component {
   };
 
   displayErrors = errors =>
-    errors.map((error, index) => <p key={index}>{error.message} </p>);
+    errors.map((error, i) => <p key={i}>{error.message}</p>);
 
   handleChange = event => {
     this.setState({ [event.target.name]: event.target.value });
@@ -83,7 +83,6 @@ class Register extends React.Component {
               )}?d=identicon`
             })
             .then(() => {
-              console.log(createdUser);
               this.saveUser(createdUser).then(() => {
                 console.log("user saved");
               });
@@ -120,7 +119,6 @@ class Register extends React.Component {
   };
 
   render() {
-    // console.log(this.state);
     const {
       username,
       email,
@@ -129,6 +127,7 @@ class Register extends React.Component {
       errors,
       loading
     } = this.state;
+
     return (
       <Grid textAlign="center" verticalAlign="middle" className="app">
         <Grid.Column style={{ maxWidth: 450 }}>
@@ -136,7 +135,7 @@ class Register extends React.Component {
             <Icon name="puzzle piece" color="orange" />
             Register for DevChat
           </Header>
-          <Form size="large" onSubmit={this.handleSubmit}>
+          <Form onSubmit={this.handleSubmit} size="large">
             <Segment stacked>
               <Form.Input
                 fluid
@@ -145,9 +144,10 @@ class Register extends React.Component {
                 iconPosition="left"
                 placeholder="Username"
                 onChange={this.handleChange}
-                type="text"
                 value={username}
+                type="text"
               />
+
               <Form.Input
                 fluid
                 name="email"
@@ -155,10 +155,11 @@ class Register extends React.Component {
                 iconPosition="left"
                 placeholder="Email Address"
                 onChange={this.handleChange}
-                type="email"
                 value={email}
                 className={this.handleInputError(errors, "email")}
+                type="email"
               />
+
               <Form.Input
                 fluid
                 name="password"
@@ -166,10 +167,11 @@ class Register extends React.Component {
                 iconPosition="left"
                 placeholder="Password"
                 onChange={this.handleChange}
-                type="password"
                 value={password}
                 className={this.handleInputError(errors, "password")}
+                type="password"
               />
+
               <Form.Input
                 fluid
                 name="passwordConfirmation"
@@ -177,10 +179,11 @@ class Register extends React.Component {
                 iconPosition="left"
                 placeholder="Password Confirmation"
                 onChange={this.handleChange}
-                type="password"
                 value={passwordConfirmation}
                 className={this.handleInputError(errors, "password")}
+                type="password"
               />
+
               <Button
                 disabled={loading}
                 className={loading ? "loading" : ""}
@@ -188,14 +191,8 @@ class Register extends React.Component {
                 fluid
                 size="large"
               >
-                {" "}
-                Submit{" "}
+                Submit
               </Button>
-
-              <Message>
-                Already a user?
-                <Link to="/login">Login</Link>
-              </Message>
             </Segment>
           </Form>
           {errors.length > 0 && (
@@ -204,6 +201,9 @@ class Register extends React.Component {
               {this.displayErrors(errors)}
             </Message>
           )}
+          <Message>
+            Already a user? <Link to="/login">Login</Link>
+          </Message>
         </Grid.Column>
       </Grid>
     );

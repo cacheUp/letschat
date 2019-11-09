@@ -1,26 +1,26 @@
 import React from "react";
 import uuidv4 from "uuid/v4";
-import { Segment, Button, Input } from "semantic-ui-react";
 import firebase from "../../firebase";
-import { connect } from "react-redux";
-import FileModal from "./FileModal";
-import ProgressBar from "./ProgressBar";
+import { Segment, Button, Input } from "semantic-ui-react";
 import { Picker, emojiIndex } from "emoji-mart";
 import "emoji-mart/css/emoji-mart.css";
 
+import FileModal from "./FileModal";
+import ProgressBar from "./ProgressBar";
+
 class MessageForm extends React.Component {
   state = {
+    storageRef: firebase.storage().ref(),
+    typingRef: firebase.database().ref("typing"),
     uploadTask: null,
     uploadState: "",
-    storageRef: firebase.storage().ref(),
+    percentUploaded: 0,
     message: "",
-    loading: false,
     channel: this.props.currentChannel,
     user: this.props.currentUser,
+    loading: false,
     errors: [],
     modal: false,
-    percentUploaded: 0,
-    typingRef: firebase.database().ref("typing"),
     emojiPicker: false
   };
 
@@ -65,7 +65,7 @@ class MessageForm extends React.Component {
 
   handleAddEmoji = emoji => {
     const oldMessage = this.state.message;
-    const newMessage = this.colonToUnicode(`${oldMessage} ${emoji.colons}`);
+    const newMessage = this.colonToUnicode(` ${oldMessage} ${emoji.colons} `);
     this.setState({ message: newMessage, emojiPicker: false });
     setTimeout(() => this.messageInputRef.focus(), 0);
   };
@@ -104,12 +104,12 @@ class MessageForm extends React.Component {
 
   sendMessage = () => {
     const { getMessagesRef } = this.props;
-    const { message, channel, typingRef, user } = this.state;
+    const { message, channel, user, typingRef } = this.state;
 
     if (message) {
       this.setState({ loading: true });
       getMessagesRef()
-        .child(this.props.currentChannel.id)
+        .child(channel.id)
         .push()
         .set(this.createMessage())
         .then(() => {
@@ -137,7 +137,7 @@ class MessageForm extends React.Component {
     if (this.props.isPrivateChannel) {
       return `chat/private/${this.state.channel.id}`;
     } else {
-      return `chat/public`;
+      return "chat/public";
     }
   };
 
@@ -145,6 +145,7 @@ class MessageForm extends React.Component {
     const pathToUpload = this.state.channel.id;
     const ref = this.props.getMessagesRef();
     const filePath = `${this.getPath()}/${uuidv4()}.jpg`;
+
     this.setState(
       {
         uploadState: "uploading",
@@ -157,7 +158,6 @@ class MessageForm extends React.Component {
             const percentUploaded = Math.round(
               (snap.bytesTransferred / snap.totalBytes) * 100
             );
-            this.props.isProgressBarVisable(percentUploaded);
             this.setState({ percentUploaded });
           },
           err => {
@@ -172,7 +172,6 @@ class MessageForm extends React.Component {
             this.state.uploadTask.snapshot.ref
               .getDownloadURL()
               .then(downloadUrl => {
-                console.log("download", downloadUrl);
                 this.sendFileMessage(downloadUrl, ref, pathToUpload);
               })
               .catch(err => {
@@ -190,15 +189,12 @@ class MessageForm extends React.Component {
   };
 
   sendFileMessage = (fileUrl, ref, pathToUpload) => {
-    console.log("file", fileUrl, "path", pathToUpload, "ref", ref);
     ref
       .child(pathToUpload)
       .push()
       .set(this.createMessage(fileUrl))
       .then(() => {
-        this.setState({
-          uploadState: "done"
-        });
+        this.setState({ uploadState: "done" });
       })
       .catch(err => {
         console.error(err);
@@ -209,25 +205,18 @@ class MessageForm extends React.Component {
   };
 
   render() {
-    const {
-      errors,
-      message,
-      loading,
-      modal,
-      uploadState,
-      percentUploaded,
-      emojiPicker
-    } = this.state;
+    // prettier-ignore
+    const { errors, message, loading, modal, uploadState, percentUploaded, emojiPicker } = this.state;
 
     return (
       <Segment className="message__form">
         {emojiPicker && (
           <Picker
             set="apple"
+            onSelect={this.handleAddEmoji}
             className="emojipicker"
             title="Pick your emoji"
             emoji="point_up"
-            onSelect={this.handleAddEmoji}
           />
         )}
         <Input
@@ -235,18 +224,17 @@ class MessageForm extends React.Component {
           name="message"
           onChange={this.handleChange}
           onKeyDown={this.handleKeyDown}
-          disabled={loading}
-          style={{ marginBottom: "0.7em" }}
+          value={message}
           ref={node => (this.messageInputRef = node)}
+          style={{ marginBottom: "0.7em" }}
           label={
             <Button
               icon={emojiPicker ? "close" : "add"}
-              onClick={this.handleTogglePicker}
               content={emojiPicker ? "Close" : null}
+              onClick={this.handleTogglePicker}
             />
           }
           labelPosition="left"
-          value={message}
           className={
             errors.some(error => error.message.includes("message"))
               ? "error"
@@ -257,6 +245,7 @@ class MessageForm extends React.Component {
         <Button.Group icon widths="2">
           <Button
             onClick={this.sendMessage}
+            disabled={loading}
             color="orange"
             content="Add Reply"
             labelPosition="left"
@@ -273,8 +262,8 @@ class MessageForm extends React.Component {
         </Button.Group>
         <FileModal
           modal={modal}
-          uploadFile={this.uploadFile}
           closeModal={this.closeModal}
+          uploadFile={this.uploadFile}
         />
         <ProgressBar
           uploadState={uploadState}
@@ -285,10 +274,4 @@ class MessageForm extends React.Component {
   }
 }
 
-const mapStateToProps = state => {
-  return {
-    currentChannel: state.channel.currentChannel
-  };
-};
-
-export default connect(mapStateToProps)(MessageForm);
+export default MessageForm;

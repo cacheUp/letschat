@@ -3,29 +3,32 @@ import ReactDOM from "react-dom";
 import App from "./components/App";
 import Login from "./components/Auth/Login";
 import Register from "./components/Auth/Register";
+import Spinner from "./Spinner";
+import registerServiceWorker from "./registerServiceWorker";
+import firebase from "./firebase";
+
+import "semantic-ui-css/semantic.min.css";
+
 import {
   BrowserRouter as Router,
   Switch,
   Route,
   withRouter
 } from "react-router-dom";
-import firebase from "./firebase";
+
 import { createStore } from "redux";
 import { Provider, connect } from "react-redux";
 import { composeWithDevTools } from "redux-devtools-extension";
+import rootReducer from "./reducers";
 import { setUser, clearUser } from "./actions";
-import rootReducer from "./reducers/index";
-import { Spinner } from "./Spinner";
-import "semantic-ui-css/semantic.min.css";
-import "./components/App.css";
 
 const store = createStore(rootReducer, composeWithDevTools());
 
 class Root extends React.Component {
   componentDidMount() {
-    console.log(this.props.isLoading);
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
+        // console.log(user);
         this.props.setUser(user);
         this.props.history.push("/");
       } else {
@@ -48,12 +51,13 @@ class Root extends React.Component {
   }
 }
 
-const mapStateToProps = state => ({
+const mapStateFromProps = state => ({
   isLoading: state.user.isLoading
 });
+
 const RootWithAuth = withRouter(
   connect(
-    mapStateToProps,
+    mapStateFromProps,
     { setUser, clearUser }
   )(Root)
 );
@@ -66,3 +70,4 @@ ReactDOM.render(
   </Provider>,
   document.getElementById("root")
 );
+registerServiceWorker();
